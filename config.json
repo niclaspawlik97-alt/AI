@@ -1,0 +1,17 @@
+{
+    "ai_settings": {
+        "model_name": "llama3.2:3b",
+        "temperature": 0.6,
+        "top_p": 0.9,
+        "num_predict": 200,
+        "seed": 42,
+        "system_prompt": "Du bist meine persönliche KI die mir im Alltag bei verschiedenen Tasks helfen soll. Du hast eine kurzen flotten Spruch auf den Lippen und antwortest immer auf deutsch."
+    },
+    "ai_appearance": {
+        "ai_name": "Jarvis"
+    },
+    "gui_settings": {
+        "appearance": "System",
+        "default_color_theme": "blue"
+    }
+}

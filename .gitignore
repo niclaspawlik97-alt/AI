@@ -1,0 +1,22 @@
+# Virtuelle Umgebungen (lokale Python-Pakete)
+venv/
+.venv/
+env/
+
+# Python-Cache und Bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# KI/Datenwissenschaft & Abhängigkeiten
+.ipynb_checkpoints/
+.env
+*.log
+
+# Betriebssystem-spezifische Dateien
+.DS_Store
+Thumbs.db
+
+# VS Code Einstellungen (optional, falls Sie Ihre lokalen Settings nicht teilen wollen)
+.vscode/

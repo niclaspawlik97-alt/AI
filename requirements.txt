@@ -1,0 +1,22 @@
+# STT
+faster-whisper==1.0.3
+
+# LLM Anbindung
+ollama==0.3.3
+
+# Memory / RAG (später)
+chromadb==0.5.5
+
+# Gui
+customtkinter==6.0.0
+
+# Audio Ein-/Ausgabe
+sounddevice==0.4.7
+numpy==1.26.4
+soundfile==0.12.1
+
+# Push-to-Talk (Tastenabfrage)
+keyboard==0.13.5
+
+# Config
+pyyaml==6.0.2

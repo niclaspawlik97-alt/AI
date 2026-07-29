@@ -2,6 +2,7 @@
 venv/
 .venv/
 env/
+secrets.json
 
 # Python-Cache und Bytecode
 **/__pycache__/

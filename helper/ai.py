@@ -1,27 +1,7 @@
 import json
 import ollama
-from datetime import datetime
-from skills import *
+from helper.skills import curent_time, curent_time_tool
 
-# Skills erstellen
-def curent_time() -> str:
-    """Gibt die aktuelle Systemzeit und das Datum zurück."""
-    # Zeit direkt als lesbaren Text formatieren
-    return datetime.now().strftime("%H:%M:%S Uhr")
-
-# 2. Das Tool manuell in das von Ollama erwartete JSON-Schema übersetzen
-curent_time_tool = {
-    "type": "function",
-    "function": {
-        "name": "curent_time",
-        "description": "Gibt die aktuelle Systemzeit und das Datum zurück.",
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
-    },
-}
 
 class AI:
 

@@ -4,6 +4,9 @@ venv/
 env/
 secrets.json
 
+# Ordner
+Vault
+
 # Python-Cache und Bytecode
 **/__pycache__/
 *.pyc

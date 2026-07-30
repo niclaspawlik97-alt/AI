@@ -1,7 +1,9 @@
 import json
 import ollama
-from helper.skills import curent_time, curent_time_tool
+from helper.skills import  *
 
+# Instanz der Skills-Klasse erstellen
+skills = Skills()
 
 class AI:
 
@@ -17,10 +19,22 @@ class AI:
             self.system_prompt = config["ai_settings"]["system_prompt"]
         self.history = [{"role": "system", "content": self.system_prompt}]
 
-        # Mapping Wörterbuch, um Funktionen über ihren Textnamen aufzurufen. 
+        # KORREKTUR: Hier müssen die echten Python-Funktionen der Instanz gemappt werden!
+        # Der Schlüssel entspricht dem "name" im JSON-Schema.
         self.available_skills = {
-            "curent_time": curent_time,
+            "current_time": skills.current_time,
+            "list_all_notes": skills.list_all_notes,
+            "read_note_content": skills.read_note_content,
+            "search_notes": skills.search_notes
         }
+
+
+        # Alle verfügbaren Tool-Schemata für Ollama sammeln
+        self.tools = [current_time_tool, 
+                      list_all_notes_tool, 
+                      read_note_content_tool, 
+                      search_notes_tool]
+
 
     # Einfacher Chataufruf
     def call_model_chat(self, message):
@@ -37,20 +51,22 @@ class AI:
                 "num_predict": self.num_predict,
                 "seed": self.seed,
             },
-            # Skills übergeben
-            tools=[curent_time_tool],
-
+            tools=self.tools,  # KORREKTUR: Saubere Liste der JSON-Schemata
             stream=False,
         )
+
+        # Überprüfen, ob das Modell ein Tool aufrufen möchte
         if "tool_calls" in response["message"] and response["message"]["tool_calls"]:
+            # WICHTIG: Die Antwort des Modells (die den Tool-Aufruf anfordert) MUSS in die History!
+            self.history.append(response["message"])
+
             for tool in response["message"]["tool_calls"]:
-                # Bei manchen Versionen ist tool ein Objekt, bei anderen ein Dict. 
-                # Das fangen wir hier sicher ab:
                 tool_name = tool.function.name if hasattr(tool, 'function') else tool['function']['name']
                 tool_args = tool.function.arguments if hasattr(tool, 'function') else tool['function']['arguments']
                 
                 function_to_call = self.available_skills.get(tool_name)
                 if function_to_call:
+                    # Führt jetzt z.B. skills.list_all_notes() aus
                     skill_output = function_to_call(**tool_args)
                     
                     self.history.append({
@@ -59,18 +75,18 @@ class AI:
                         "name": tool_name
                     })
             
+            # Finaler Aufruf, damit das Modell die Tool-Ergebnisse auswertet
             final_response = ollama.chat(
                 model=self.model, 
                 messages=self.history, 
-                tools=[curent_time_tool]
+                tools=self.tools
             )
-            # KORREKTUR 2: Dictionary-Zugriff auch hier anpassen
             content = final_response["message"]["content"]
         else:
-            # KORREKTUR 3: Dictionary-Zugriff für normale Antworten
             content = response["message"]["content"]
 
         return content
+
     def save_assistant_response(self, full_content):
         self.history.append({"role": "assistant", "content": full_content})
 

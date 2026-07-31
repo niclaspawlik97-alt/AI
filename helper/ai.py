@@ -1,5 +1,6 @@
 import json
 import ollama
+import logging
 from helper.skills import  *
 
 # Instanz der Skills-Klasse erstellen
@@ -10,13 +11,19 @@ class AI:
     # Initialisiere AI Agent
     def __init__(self, config_path="config.json"):
         with open(config_path, "r", encoding="utf-8") as file:
-            config = json.load(file)
-            self.model = config["ai_settings"]["model_name"]
-            self.temperature = config["ai_settings"]["temperature"]
-            self.top_p = config["ai_settings"]["top_p"]
-            self.num_predict = config["ai_settings"]["num_predict"]
-            self.seed = config["ai_settings"]["seed"]
-            self.system_prompt = config["ai_settings"]["system_prompt"]
+            try:
+                config = json.load(file)
+                self.model = config["ai_settings"]["model_name"]
+                self.temperature = config["ai_settings"]["temperature"]
+                self.top_p = config["ai_settings"]["top_p"]
+                self.num_predict = config["ai_settings"]["num_predict"]
+                self.seed = config["ai_settings"]["seed"]
+                self.system_prompt = config["ai_settings"]["system_prompt"]
+                logging.info("ai.py initialised.")
+                pass
+            except:
+                logging.exception("Error while ai.py initialised.")
+
         self.history = [{"role": "system", "content": self.system_prompt}]
 
         # KORREKTUR: Hier müssen die echten Python-Funktionen der Instanz gemappt werden!
@@ -51,7 +58,7 @@ class AI:
                 "num_predict": self.num_predict,
                 "seed": self.seed,
             },
-            tools=self.tools,  # KORREKTUR: Saubere Liste der JSON-Schemata
+            tools=self.tools,
             stream=False,
         )
 
@@ -59,6 +66,7 @@ class AI:
         if "tool_calls" in response["message"] and response["message"]["tool_calls"]:
             # WICHTIG: Die Antwort des Modells (die den Tool-Aufruf anfordert) MUSS in die History!
             self.history.append(response["message"])
+            logging.info("Use Toolcalling.")
 
             for tool in response["message"]["tool_calls"]:
                 tool_name = tool.function.name if hasattr(tool, 'function') else tool['function']['name']

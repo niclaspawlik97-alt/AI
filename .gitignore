@@ -6,6 +6,7 @@ secrets.json
 
 # Ordner
 Vault
+logs
 
 # Python-Cache und Bytecode
 **/__pycache__/

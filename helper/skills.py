@@ -102,13 +102,13 @@ read_note_content_tool = {
     "type": "function",
     "function": {
         "name": "read_note_content",
-        "description": "Liest den exakten Inhalt einer bestimmten Notiz anhand ihres relativen Pfads.",
+        "description": "Liest den Inhalt einer Datei. WICHTIG: Verwende als 'relative_path' IMMER den exakten String, den das Tool 'list_all_notes' oder 'search_notes' zurückgegeben hat (inklusive Unterordnern und '.md' Endung).",
         "parameters": {
             "type": "object",
             "properties": {
                 "relative_path": {
                     "type": "string",
-                    "description": "Der relative Pfad zur Markdown-Datei aus der Notizliste (z.B. 'Ordner/Notiz.md')."
+                    "description": "Exakter relativer Pfad aus der Dateiliste, z.B. 'Programmiere/Python/libs/json Library.md'"
                 }
             },
             "required": ["relative_path"],
@@ -120,13 +120,13 @@ search_notes_tool = {
     "type": "function",
     "function": {
         "name": "search_notes",
-        "description": "Durchsucht den Inhalt aller Notizen in der Vault nach einem bestimmten Suchbegriff oder Schlagwort.",
+        "description": "Durchsucht den INHALT (Volltext) aller Notizen nach einem bestimmten Schlüsselwort. Nutze dieses Tool, wenn der Nutzer nach Themen oder internen Texten sucht, NICHT für reine Dateinamensuche.",
         "parameters": {
             "type": "object",
             "properties": {
                 "keyword": {
                     "type": "string",
-                    "description": "Das Wort oder Phrasensegment, nach dem in den Notizen gesucht werden soll."
+                    "description": "Das Suchwort oder die Phrase."
                 }
             },
             "required": ["keyword"],

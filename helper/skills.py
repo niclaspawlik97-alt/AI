@@ -1,6 +1,7 @@
 import re
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -43,6 +44,7 @@ class Skills:
                 logging.info(f"Read file: {clean_path}")
                 return content if content.strip() else "Die Datei ist leer."
         except Exception as e:
+            logging.critical(f"Error whil reading file {str(e)}")
             return f"Fehler beim Lesen der Datei: {str(e)}"
 
 
@@ -68,6 +70,8 @@ class Skills:
                     })
             except Exception:
                 continue  # Überspringt nicht lesbare Dateien sicher
+
+        logging.info("Used search notes skill.")
                 
         return results
 

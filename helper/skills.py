@@ -2,8 +2,10 @@ import re
 import json
 import logging
 import requests
+
 from datetime import datetime
 from pathlib import Path
+from collections import defaultdict
 
 class Skills:
 
@@ -136,7 +138,24 @@ class Skills:
             return "Api Key nicht gültig."
         response.raise_for_status()
 
-        return response.json()
+        return {"forecast": self.summarize_by_day(response.json())}
+
+    def summarize_by_day(self, data: dict) -> list[dict]:
+        days = defaultdict(list)
+        for entry in data["list"]:
+            date = entry["dt_txt"].split(" ")[0]
+            days[date].append(entry)
+
+        summary = []
+        for date, entries in days.items():
+            temps = [e["main"]["temp"] for e in entries]
+            summary.append({
+                "date": date,
+                "temp_min": round(min(temps), 1),
+                "temp_max": round(max(temps), 1),
+                "description": entries[len(entries)//2]["weather"][0]["description"]
+            })
+        return summary
 
 
 # 2. Die Tools manuell in das von Ollama erwartete JSON-Schema übersetzen
@@ -220,7 +239,7 @@ search_web_tool = {
     },
 }
 
-get_weather_tool = [{
+get_weather_tool = {
     "type": "function",
     "function": {
         "name": "get_weather",
@@ -233,4 +252,4 @@ get_weather_tool = [{
             "required": ["city_name"]
         }
     }
-}]
+}

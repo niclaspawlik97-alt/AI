@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 from pathlib import Path
 
 class Logger:
@@ -10,9 +11,17 @@ class Logger:
             # Absoluten Pfad zum Projektverzeichnis ermitteln und logs-Ordner erstellen
             log_dir = Path(__file__).parent.parent / "logs"
             log_dir.mkdir(exist_ok=True)
+
+            self.logger_path = log_dir/f"{config['ai_appearance']['ai_name']}.log"
+
+            if self.logger_path.exists():
+                os.remove(self.logger_path)
             
             # Dateiname zusammensetzen und als String speichern
-            self.logger_path = str(log_dir / f"{config['ai_appearance']['ai_name']}.log")
+            self.logger_path_conect = str(self.logger_path)
+
+
+
             self.logger_level = config["logging"]["level"]
 
     def logger_init(self):
@@ -20,7 +29,7 @@ class Logger:
         
         # force=True überschreibt bestehende Logging-Konfigurationen anderer Bibliotheken
         logging.basicConfig(
-            filename=self.logger_path,
+            filename=self.logger_path_conect,
             filemode='a',
             level=logger_level_,
             format='%(asctime)s - %(levelname)s - %(message)s',

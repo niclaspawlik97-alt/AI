@@ -18,5 +18,6 @@ soundfile==0.12.1
 # Push-to-Talk (Tastenabfrage)
 keyboard==0.13.5
 
-# Config
-pyyaml==6.0.2
+# Internet Suche
+duckduckgo-search==8.1.1
+beautifulsoup4==4.4.1

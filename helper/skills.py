@@ -1,16 +1,22 @@
 import re
 import json
 import logging
-import os
+import requests
 from datetime import datetime
 from pathlib import Path
 
 class Skills:
 
-    def __init__(self, secrets_path="secrets.json"):
-        with open(secrets_path, "r", encoding="utf-8") as file:
+    def __init__(self):
+        with open("secrets.json", "r", encoding="utf-8") as file:
             secrets = json.load(file)
             self.obsidian_vault = Path(secrets["folders"]["obsidian_vault"])
+            self.open_weather = secrets["api_key"]["open_weather"]
+
+        with open("config.json", "r", encoding="utf-8") as config_file:
+            config = json.load(config_file)
+            self.searxng_ip = config["web_search"]["searxng_ip"]
+            self.searxng_timeout = config["web_search"]["timeout"]
         logging.info("Skills initialised.")
 
     def current_time(self) -> str:
@@ -47,8 +53,6 @@ class Skills:
             logging.critical(f"Error whil reading file {str(e)}")
             return f"Fehler beim Lesen der Datei: {str(e)}"
 
-
-
     def search_notes(self, keyword: str, is_regex: bool = False) -> list[dict]:
         """Durchsucht alle Notizen nach einem Begriff oder Regex-Muster."""
         results = []
@@ -74,6 +78,66 @@ class Skills:
         logging.info("Used search notes skill.")
                 
         return results
+
+
+    # Internet Suche
+    def search_web(self, search_key):
+        logging.info(f"Start searXNG search for: {search_key}")
+
+        searxng_url = f"http://{self.searxng_ip}/search"
+        params = {
+            "q": search_key,
+            "format": "json"
+        }
+
+        try:
+            response = requests.get(searxng_url, params=params, timeout= self.searxng_timeout)
+            response.raise_for_status()
+            data = response.json()
+
+            results = data.get("results", [])
+            logging.debug(f"Results of websearch: {results}")
+            if not results:
+                logging.error("No data from web search.")
+                return "Es konnten keine Informationen im Internet gefunden werden."
+
+            context = ""
+            for i, item in enumerate(results[:5], 1):
+                titel = item.get("title", "Kein Titel")
+                content = item.get("content","")
+                url = item.get("url","")
+                context += f"Quelle: {i}: {titel}\nURL: {url}\nInhalt: {content}\n\n"
+
+            return context
+
+        except Exception as e:
+            logging.error(f"SearXNG-Suche fehlgeschlagen: {e}")
+            return "Es konnten keine aktuellen Informationne im Internet gefunden werden."
+    
+    # Weather Skill
+    def get_weather(self, city_name:str) ->dict:
+        logging.info("Use get_weather skill.")
+        url = "https://api.openweathermap.org/data/2.5/forecast"
+        params = {
+            "q": city_name,
+            "appid": self.open_weather,
+            "units": "metric",
+            "lang": "de"
+        }
+        response = requests.get(url, params=params)
+        logging.debug(f"Response: {response}")
+
+        if response.status_code == 404:
+            logging.error(f"City {city_name} not found.")
+            return f"City {city_name} not found."
+
+        if response.status_code == 401:
+            logging.error("Api key invalid.")
+            return "Api Key nicht gültig."
+        response.raise_for_status()
+
+        return response.json()
+
 
 # 2. Die Tools manuell in das von Ollama erwartete JSON-Schema übersetzen
 current_time_tool = {
@@ -137,3 +201,36 @@ search_notes_tool = {
         },
     },
 }
+
+search_web_tool = {
+    "type": "function",
+    "function": {
+        "name": "search_web",
+        "description": "Durchsucht das Internet mit SearXNG nach aktuellen Informationen, die nicht in den Notizen vorhanden sind.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "search_key": {
+                    "type": "string",
+                    "description": "Der präzise Suchbegriff oder die Suchphrase für die Websuche."
+                }
+            },
+            "required": ["search_key"],
+        },
+    },
+}
+
+get_weather_tool = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Gibt die Wettervorhersage für eine Stadt zurück",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city_name": {"type": "string", "description": "Stadtname, z.B. 'München'"}
+            },
+            "required": ["city_name"]
+        }
+    }
+}]

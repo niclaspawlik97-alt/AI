@@ -37,7 +37,6 @@ class gui:
         self.chat_history = ctk.CTkTextbox(
             self.window, state="disabled", wrap="word"
         )
-        # KORREKTUR: columnspan von 2 auf 3 erhöht, damit alle 3 Spalten abgedeckt sind
         self.chat_history.grid(
             row=0, column=0, columnspan=3, padx=20, pady=20, sticky="nsew"
         )
